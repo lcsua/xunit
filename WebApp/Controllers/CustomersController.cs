@@ -8,12 +8,12 @@ using WebApp.Core.Domain.Entities;
 
 namespace WebApp.Controllers
 {
+ 
     [ApiController]
     [ApiVersion("1.0")]
     [Produces("application/json",
               "application/xml")]
-    [Route("api/v{version:apiVersion}/[controller]")]
-    
+    [Route("api/v{version:apiVersion}/[controller]")]    
     public class CustomersController : Controller
     {
         private readonly ICustomerRepository _customerRepository;
@@ -25,14 +25,18 @@ namespace WebApp.Controllers
        
         [HttpGet]
         [ProducesResponseType(typeof(ICollection<Customer>), 200)]
-        public IActionResult Index()
+        public async Task<IActionResult> GetAll()
         {
-            return  Ok(_customerRepository.GetCustomers());
+            var customers = _customerRepository.GetCustomers();
+            if (customers!=null && customers.Any())
+                return Ok(customers);
+            else
+                return NotFound();
         }
 
         [HttpGet("{customerId}")]
         [ProducesResponseType(typeof(Customer), 200)]
-        public IActionResult Index(int customerId)
+        public async Task<IActionResult> Get(int customerId)
         {
             return Ok(_customerRepository.GetCustomerByID(customerId));
         }
