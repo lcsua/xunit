@@ -11,7 +11,7 @@ namespace WebApp.Core.Aplication.Interfaces
     {
         IEnumerable<Customer> GetCustomers();
         Customer GetCustomerByID(int customerId);
-        void InsertCustomer(Customer customer);
+        Task<Customer> InsertCustomer(Customer customer);
         void DeleteCustomer(int customerId);
         void UpdateCustomer(Customer customer);
         void Save();

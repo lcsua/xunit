@@ -38,7 +38,22 @@ namespace WebApp.Controllers
         [ProducesResponseType(typeof(Customer), 200)]
         public async Task<IActionResult> Get(int customerId)
         {
-            return Ok(_customerRepository.GetCustomerByID(customerId));
+	        var customer = _customerRepository.GetCustomerByID(customerId);
+	        if (customer != null)
+		        return Ok(customer);
+	        else
+		        return NotFound();
+        }
+
+        [HttpPost]
+        [ProducesResponseType(typeof(Customer), 202)]
+        public async Task<IActionResult> Post(Customer customer)
+        {
+	        var customerInsert = await _customerRepository.InsertCustomer(customer);
+	        if (customerInsert != null)
+		        return Accepted(customer);
+	        else
+		        return NoContent();
         }
     }
 }

@@ -11,7 +11,7 @@ namespace WebApp.Infrastructure.Repositories
 {
     public class CustomerRepository : ICustomerRepository
     {
-        private IEnumerable<Customer> _customers;
+        private List<Customer> _customers;
 
         public CustomerRepository()
         {
@@ -46,9 +46,12 @@ namespace WebApp.Infrastructure.Repositories
         }
 
 
-        public void InsertCustomer(Customer customer)
+        public async Task<Customer> InsertCustomer(Customer customer)
         {
-            throw new NotImplementedException();
+	        var id = _customers.OrderByDescending(x => x.CustomerId).FirstOrDefault().CustomerId;
+	        customer.CustomerId = id++;
+            _customers.Add(customer);
+            return customer;
         }
 
         public void DeleteCustomer(int customerId)
