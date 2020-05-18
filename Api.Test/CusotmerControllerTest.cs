@@ -5,6 +5,7 @@ using NSubstitute.ReturnsExtensions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using WebApp.Controllers;
 using WebApp.Core.Aplication.Interfaces;
@@ -167,5 +168,78 @@ namespace Api.Test
 			Assert.NotNull(customerInsert);
 			Assert.Equal(StatusCodes.Status204NoContent, customerInsert.StatusCode);
 		}
+
+		//The same test with fluent assertions
+
+		#region fluentassertions
+
+
+		[Fact]
+		public async Task GetAllAsync_ShouldReturn200_WhenCustomerExistFa()
+		{
+			// arrange
+			_customerRepository.GetCustomers().Returns(_customersList);
+			// act
+			var customers = await _customerController.GetAll();
+			var result = customers as ObjectResult;
+			// assert
+			var items = Assert.IsAssignableFrom<IEnumerable<Customer>>(
+				Assert.IsType<List<Customer>>(result.Value));
+			//Assert.NotNull(result);
+			result.Should().NotBeNull();
+			//Assert.True(result is OkObjectResult);
+			result.Should().BeAssignableTo<OkObjectResult>();
+			//Assert.Equal(2, items.Count());
+			items.Should().HaveCount(2);
+			//Assert.Equal(StatusCodes.Status200OK, result.StatusCode);
+			result.StatusCode.Should().Be(StatusCodes.Status200OK);
+		}
+
+		[Fact]
+		public async Task GetAllAsync_ShouldReturn404_WhenCustomersAreNullFa()
+		{
+			// arrange
+			_customerRepository.GetCustomers().ReturnsNull();
+			// act
+			var customers = await _customerController.GetAll();
+			var result = customers as NotFoundResult;
+			// assert
+			customers.Should().NotBeNull();
+			result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+		}
+
+		[Fact]
+		public async Task GetCustomerByIdAsync_ShouldReturn200_WhenCustomerExistFa()
+		{
+			// arrange
+			var customerId = 1;
+			_customerRepository.GetCustomerByID(customerId).Returns(_customersList.FirstOrDefault(x => x.CustomerId == customerId));
+			// act
+			var customerResult = (await _customerController.Get(customerId)) as ObjectResult;
+
+			// assert
+			var customer = customerResult.Value.Should().BeOfType<Customer>().Subject; 
+			Assert.NotNull(customerResult);
+			Assert.True(customerResult is OkObjectResult);
+			Assert.Equal(customerId, customer.CustomerId);
+			Assert.Equal(StatusCodes.Status200OK, customerResult.StatusCode);
+		}
+
+		[Fact]
+		public async Task GetCustomerByIdAsync_ShouldReturn404_WhenCustomerDoesNotExistFa()
+		{
+			// arrange
+			var customerId = 1;
+			_customerRepository.GetCustomerByID(customerId).ReturnsNull();
+			// act
+			var customers = await _customerController.Get(customerId);
+			var result = customers as NotFoundResult;
+			// assert
+			customers.Should().NotBeNull();
+			result.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+		}
+
+
+		#endregion
 	}
 }
