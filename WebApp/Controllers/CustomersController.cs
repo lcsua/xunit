@@ -49,11 +49,16 @@ namespace WebApp.Controllers
         [ProducesResponseType(typeof(Customer), 202)]
         public async Task<IActionResult> Post(Customer customer)
         {
+	        if (customer == null)
+	        {
+		        return BadRequest("the customer is required");
+	        }
 	        var customerInsert = await _customerRepository.InsertCustomer(customer);
-	        if (customerInsert != null)
+	        if (customerInsert?.CustomerId > 0)
+	        {
 		        return Accepted(customer);
-	        else
-		        return NoContent();
+	        }
+	        return NoContent();
         }
     }
 }
