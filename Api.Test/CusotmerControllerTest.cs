@@ -133,7 +133,39 @@ namespace Api.Test
 			Assert.Equal(StatusCodes.Status202Accepted, customerInsert.StatusCode);
 		}
 
+		[Fact]
+		public async Task PostCustomerAsync_ShouldReturn400_WhenCustomerIsNull()
+		{
+			// arrange
+			_customerRepository.InsertCustomer(null).ReturnsNull();
+			// act
+			var customerInsert = (await _customerController.Post(null)) as BadRequestObjectResult;
+			// assert
+			Assert.NotNull(customerInsert);
+			Assert.Equal(StatusCodes.Status400BadRequest, customerInsert.StatusCode);
+			Assert.StartsWith("the customer is required", customerInsert.Value.ToString());
+		}
 
-
+		[Fact]
+		public async Task PostCustomerAsync_ShouldReturn294_WhenCustomerCouldNotBeInsert()
+		{
+			// arrange
+			// arrange
+			var customerId = 3;
+			var customer = new Customer
+			{
+				CustomerId = customerId,
+				FirstName = "unit",
+				LastName = "test",
+				Status = CustomerStatus.Active,
+				Address = "test"
+			};
+			_customerRepository.InsertCustomer(customer).ReturnsNull();
+			// act
+			var customerInsert = (await _customerController.Post(customer)) as NoContentResult;
+			// assert
+			Assert.NotNull(customerInsert);
+			Assert.Equal(StatusCodes.Status204NoContent, customerInsert.StatusCode);
+		}
 	}
 }
